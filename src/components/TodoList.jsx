@@ -1,17 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 // CONCEPT: Lists + keys, controlled forms, event handling, conditional rendering
 function TodoList() {
   const [todos, setTodos] = useState([
-    { id: 1, text: 'Learn JSX', done: true },
-    { id: 2, text: 'Learn hooks', done: false },
+    { id: 1, text: 'Learn JSX', done: true, isEdit: false },
+    { id: 2, text: 'Learn hooks', done: false, isEdit: false },
+	{ id: 3, text: 'Learn form submission', done: false, isEdit: false }
   ])
   const [text, setText] = useState('') // controlled input
 
   function addTodo(e) {
     e.preventDefault() // event handling
     if (!text.trim()) return
-    setTodos([...todos, { id: Date.now(), text, done: false }])
+    setTodos([...todos, { id: Date.now(), text, done: false, isEdit: false }])
     setText('')
   }
 
@@ -22,6 +23,14 @@ function TodoList() {
 
   function removeTodo(id) {
     setTodos(todos.filter((t) => t.id !== id))
+  }
+
+  function editTodo(id) {
+	setTodos(todos.map((t) => (t.id === id ? {...t, isEdit: !t.isEdit} : t)))
+  }
+
+  function updateTodo(id, textVal) {
+	setTodos(todos.map((t) => (t.id === id ? {...t, text: textVal} : t)))
   }
 
   return (
@@ -49,9 +58,20 @@ function TodoList() {
                   checked={todo.done}
                   onChange={() => toggleTodo(todo.id)}
                 />
-                {' '}{todo.text}
+                {' '}
+				{
+					todo.isEdit ? (
+						<input
+						  value={todo.text}
+						  onChange={(e) => updateTodo(todo.id, e.target.value)}
+						/>
+					) : (todo.text)
+				}
+				
+				
               </label>{' '}
-              <button onClick={() => removeTodo(todo.id)}>x</button>
+              <button onClick={() => removeTodo(todo.id)}>x</button>{' '}
+			  <button onClick={() => editTodo(todo.id)}>{todo.isEdit ? 'Done' : 'Edit'}</button>
             </li>
           ))}
         </ul>

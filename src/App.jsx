@@ -19,7 +19,7 @@ function App() {
 
       <section>
         <h2>1. Components, Props & JSX</h2>
-        <Greeting name="Ada" role="Admin" />
+        <Greeting name="Ada" role="Admin" age="33" />
       </section>
 
       <section>
