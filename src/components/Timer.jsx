@@ -10,14 +10,14 @@ function Timer() {
 
   useEffect(() => {
     if (!running) return
-    const id = setInterval(() => setSeconds((s) => s + 1), 1000) // This setInterval() method [originally window.setInterval] starts a background browser timer and returns a unique ID that can be referenced later in code. This timer updates the seconds variable using setSeconds function every 1000ms
+    const id = setInterval(() => setSeconds((s) => s + 1), 1000)
     return () => clearInterval(id) // cleanup
-  }, []) // re-run effect only when `running` changes
+  }, [running]) // re-run effect only when `running` changes
 
   return (
     <div>
       <p>Elapsed: {seconds}s</p>
-      <button onClick={() => setRunning((isRunning) => !isRunning)}>
+      <button onClick={() => setRunning((r) => !r)}>
         {running ? 'Pause' : 'Resume'}
       </button>
     </div>

@@ -8,11 +8,9 @@ function Counter() {
   return (
     <div>
       <p>Count: {count}</p>
-	  <button onClick={() => count <= 0 ? setCount(0) : setCount(count - 1)}>-</button>{' '}
+      <button onClick={() => setCount(count - 1)}>-</button>{' '}
       <button onClick={() => setCount(count + 1)}>+</button>{' '}
-      <button onClick={() => setCount(0)}>Reset</button><br></br>
-	  <button onClick={() => setCount(count + 2)}>Step up by 2</button>{' '}
-	  <button onClick={() => count <= 0 ? setCount(0) : setCount(count - 2)}>Step down by 2</button>
+      <button onClick={() => setCount(0)}>Reset</button>
     </div>
   )
 }

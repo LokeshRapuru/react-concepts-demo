@@ -30,6 +30,8 @@ something and see what happens.
 | 8 | `useMemo`, `useCallback`, `React.memo` (performance) | `src/components/ExpensiveCalc.jsx` |
 | 9 | Custom hooks + data fetching + loading/error state | `src/hooks/useFetch.js`, `src/components/UserList.jsx` |
 | 10 | More conditional rendering patterns | `src/components/ConditionalRender.jsx` |
+| 11 | React Router (routing, dynamic routes, useParams, useNavigate) | `src/App.jsx`, `src/pages/*`, `src/components/Nav.jsx` |
+| 12 | Redux Toolkit (global store, slices, useSelector/useDispatch) | `src/store/*`, `src/components/ReduxCounter.jsx`, `ReduxCart.jsx` |
 
 ## Step-by-step walkthrough
 
@@ -126,9 +128,104 @@ where each reads best.
 ## Where to go from here
 
 Once this feels comfortable, natural next steps are:
-- **React Router** for multi-page navigation.
+- **React Router** for multi-page navigation. ✅ now in this project, see below.
 - **Form libraries** (react-hook-form) for complex forms with validation.
 - **Data fetching libraries** (TanStack Query) which handle caching,
   retries, and race conditions that `useFetch` here does only minimally.
 - **State management** (Zustand, Redux Toolkit) once Context alone starts
-  feeling unwieldy for global state.
+  feeling unwieldy for global state. ✅ Redux Toolkit now in this project, see below.
+
+---
+
+## 11. React Router
+
+**What it solves:** a "single-page app" (SPA) loads one HTML page and then
+JavaScript swaps content in and out as the user navigates — no full page
+reloads. React Router is what maps a URL (`/users/3`) to a component
+(`UserProfile`), and updates the URL when the user clicks a link, without
+ever asking the server for a new page.
+
+**Where it's wired up:**
+- `src/main.jsx` — the whole app is wrapped in `<BrowserRouter>`. This has
+  to be *above* anything that uses routing hooks (`useParams`, `useNavigate`,
+  `<Link>`, etc.) — think of it like a Context provider, because that's
+  essentially what it is under the hood.
+- `src/App.jsx` — `<Routes>` and `<Route>` declare "when the URL matches
+  this path, render this component." Routes are checked top to bottom;
+  the first match wins.
+- `src/components/Nav.jsx` — `<NavLink>` navigates without a reload and
+  exposes whether it's the active route, for styling.
+- `src/pages/UsersList.jsx` + `UserProfile.jsx` — a list page linking to
+  a **dynamic route** (`/users/:id`), and a detail page reading that `:id`
+  out of the URL with `useParams()`.
+- `src/pages/NotFound.jsx` — a catch-all route (`path="*"`) for unmatched URLs.
+
+**Key concepts to know for real usage:**
+- `<Link to="...">` vs a plain `<a href="...">` — `<Link>` intercepts the
+  click and updates the URL via the browser's History API, so React state
+  isn't lost and no request goes to the server. A plain `<a>` would trigger
+  a full reload.
+- `useParams()` — reads dynamic segments (`:id`) from the current URL.
+- `useNavigate()` — navigate programmatically (after a form submits, after
+  a timeout, on a "Back" button) instead of requiring a user click on a `<Link>`.
+- `useSearchParams()` (not shown here, worth knowing) — reads/writes query
+  string params like `?sort=name`.
+- Nested routes / `<Outlet>` (not shown here) — lets a parent route render
+  shared layout (e.g. a sidebar) while a child route fills in the content area.
+
+**Try:** add a `/users/:id/edit` nested route, or add a `?highlight=true`
+query param read via `useSearchParams()`.
+
+---
+
+## 12. Redux (Redux Toolkit)
+
+**What it solves:** Context is great for state that changes rarely (theme,
+locale) because *every* consumer of a context re-renders whenever the
+context value changes — there's no way to subscribe to just part of it.
+Redux (via `react-redux`'s `useSelector`) lets a component subscribe to
+one specific slice of global state, so it only re-renders when *that*
+slice changes, not on every store update. That's the main practical reason
+to reach for Redux over Context once state is large, frequently updated,
+and read by many unrelated components.
+
+**Where it's wired up:**
+- `src/store/counterSlice.js`, `src/store/cartSlice.js` — each **slice**
+  bundles a piece of state, its reducers, and auto-generated action
+  creators. This is the Redux Toolkit way — it replaces writing action
+  type strings, action creator functions, and a big switch-statement
+  reducer by hand (what you'd have done in "classic" Redux).
+- `src/store/store.js` — combines slices into one store via `configureStore`.
+- `src/main.jsx` — `<Provider store={store}>` makes the store available
+  to any component in the tree, same mechanism as a Context provider.
+- `src/components/ReduxCounter.jsx`, `ReduxCart.jsx` — read state with
+  `useSelector((state) => state.counter.value)` and update it by calling
+  `dispatch(someAction())`.
+
+**Directly compare in the app:**
+- `/concepts` section 6 (`CartReducer.jsx`, `useReducer`) vs `/redux`'s
+  cart — **identical logic**, but one is local to a component tree and
+  the other is global. Navigate away from `/redux` and back — the Redux
+  cart still has its items, because the store lives above the router in
+  `main.jsx` and isn't tied to any one page's lifecycle. The `useReducer`
+  version would reset if you unmounted that component tree.
+
+**Why the reducers "mutate" state:** Redux Toolkit uses a library called
+Immer internally. Writing `state.value += 1` inside a slice reducer looks
+like direct mutation, but Immer intercepts it and produces a proper
+immutable update behind the scenes. This is a deliberate ergonomic choice
+in Toolkit — in plain Redux, you'd have to write
+`return { ...state, value: state.value + 1 }` yourself every time.
+
+**Try:** install the Redux DevTools browser extension, open it while using
+`/redux`, and watch each dispatched action and the resulting state diff —
+this is one of Redux's biggest practical advantages over Context, which
+has no equivalent inspection tooling.
+
+**When to actually reach for this** (see the interview-answer version for
+more detail): global state that's large, changes often, and is read by
+many components spread across the app. For most small-to-medium apps,
+Context + `useReducer` (what `/concepts` shows) or a lighter library like
+Zustand covers the same need with less boilerplate. Redux earns its cost
+at real scale, or when you specifically want its devtools/middleware
+ecosystem (undo/redo, logging, persistence, etc.).

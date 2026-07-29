@@ -1,73 +1,32 @@
-import Greeting from './components/Greeting.jsx'
-import Counter from './components/Counter.jsx'
-import Timer from './components/Timer.jsx'
-import TodoList from './components/TodoList.jsx'
-import { ThemeProvider } from './context/ThemeContext.jsx'
-import ThemeToggle from './components/ThemeToggle.jsx'
-import CartReducer from './components/CartReducer.jsx'
-import FocusInput from './components/FocusInput.jsx'
-import ExpensiveCalc from './components/ExpensiveCalc.jsx'
-import UserList from './components/UserList.jsx'
-import ConditionalRender from './components/ConditionalRender.jsx'
+import { Routes, Route } from 'react-router-dom'
+import Nav from './components/Nav.jsx'
+import Home from './pages/Home.jsx'
+import ConceptsPage from './pages/ConceptsPage.jsx'
+import ReduxPage from './pages/ReduxPage.jsx'
+import UsersList from './pages/UsersList.jsx'
+import UserProfile from './pages/UserProfile.jsx'
+import NotFound from './pages/NotFound.jsx'
 
-// Each <section> below maps 1:1 to a step in README.md.
-// Open the components alongside the README to see concept + code together.
+// CONCEPT: Routes + Route
+// <Routes> looks at the current URL and renders the first matching <Route>.
+// This all happens client-side - clicking a Nav link updates the URL via
+// the History API and swaps the rendered page, without a server round trip
+// or full page reload.
 function App() {
   return (
     <div className="app">
       <h1>React Concepts Playground</h1>
-
-      <section>
-        <h2>1. Components, Props & JSX</h2>
-        <Greeting name="Ada" role="Admin" age="33" />
-      </section>
-
-      <section>
-        <h2>2. useState</h2>
-        <Counter />
-      </section>
-
-      <section>
-        <h2>3. useEffect</h2>
-        <Timer />
-      </section>
-
-      <section>
-        <h2>4. Lists, Keys, Forms & Events</h2>
-        <TodoList />
-      </section>
-
-      <section>
-        <h2>5. Context API</h2>
-        <ThemeProvider>
-          <ThemeToggle />
-        </ThemeProvider>
-      </section>
-
-      <section>
-        <h2>6. useReducer</h2>
-        <CartReducer />
-      </section>
-
-      <section>
-        <h2>7. useRef</h2>
-        <FocusInput />
-      </section>
-
-      <section>
-        <h2>8. useMemo, useCallback & React.memo</h2>
-        <ExpensiveCalc />
-      </section>
-
-      <section>
-        <h2>9. Custom Hooks & Data Fetching</h2>
-        <UserList />
-      </section>
-
-      <section>
-        <h2>10. Conditional Rendering Patterns</h2>
-        <ConditionalRender />
-      </section>
+      <Nav />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/concepts" element={<ConceptsPage />} />
+        <Route path="/redux" element={<ReduxPage />} />
+        <Route path="/users" element={<UsersList />} />
+        {/* :id is a dynamic segment, read via useParams() in UserProfile */}
+        <Route path="/users/:id" element={<UserProfile />} />
+        {/* catch-all 404 */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </div>
   )
 }
